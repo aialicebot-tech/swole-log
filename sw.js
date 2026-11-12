@@ -1,5 +1,5 @@
 // Swole Log offline cache. Bump VERSION whenever any app file changes.
-const VERSION = 'swole-log-v1';
+const VERSION = 'swole-log-v2';
 const FONTS = 'swole-log-fonts';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 

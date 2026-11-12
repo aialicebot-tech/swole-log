@@ -41,7 +41,7 @@
   --t1:#6F7783; --t2:#F2643F; --t3:#5B8BEA; --t4:#E9C13B; --t5:#45B872; --t6:#ECEEF1;
   --c1:#F2643F; --c2:#5B8BEA; color-scheme:dark }
 *{box-sizing:border-box}
-html,body{background:var(--bg)}
+html,body{background:var(--bg);overflow-x:hidden;overflow-x:clip;max-width:100%}
 body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.4;-webkit-text-size-adjust:100%;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:env(safe-area-inset-top,0px) calc(150px + env(safe-area-inset-bottom,0px))}
@@ -70,11 +70,15 @@ h2.sec{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:
 .btn.line{background:transparent;border:1px solid var(--line);color:var(--ink)}
 .btn.sm{padding:8px 12px;min-height:36px;font-size:14px}
 .btn:disabled{opacity:.5}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:14px;white-space:nowrap;font-weight:500}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);background:var(--sunk);border-radius:10px;padding:10px 12px;min-height:44px}
-label.lb{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink2);font-weight:500}
+input.f,select.f,textarea.f{width:100%;max-width:100%;min-width:0;display:block;border:1px solid var(--line);background:var(--sunk);border-radius:10px;padding:10px 12px;min-height:44px;font-size:16px}
+input[type=date].f{-webkit-appearance:none;appearance:none;text-align:left;line-height:22px}
+input[type=date].f::-webkit-date-and-time-value{text-align:left}
+input,select,textarea{font-size:16px}
+.row>*{min-width:0}
+label.lb{min-width:0;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink2);font-weight:500}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
 .check input{width:20px;height:20px;margin-top:1px;accent-color:var(--accent)}
 
@@ -89,14 +93,14 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .next{display:flex;flex-direction:column;gap:10px}
 .next .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .next h1{font-family:var(--display);font-size:34px;line-height:1;font-weight:700;text-transform:uppercase}
-.wk{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:center}
+.wk{display:grid;grid-template-columns:54px minmax(0,1fr);gap:10px;align-items:center}
 .wk .lab{font-family:var(--display);line-height:1.05}
-.wk .lab b{font-size:20px;display:block}
+.wk .lab b{font-size:19px;display:block}
 .wk .lab span{font-size:12px;color:var(--ink2)}
-.days{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.day{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 6px;text-align:left;min-height:58px;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
+.days{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.day{min-width:0;overflow:hidden;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 2px 8px 5px;text-align:left;min-height:58px;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
 .day b{font-family:var(--display);font-size:16px;line-height:1}
-.day span{font-size:11px;color:var(--ink2)}
+.day span{font-size:10px;letter-spacing:-.01em;color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .day.part{border-color:var(--warn);box-shadow:inset 0 -3px 0 var(--warn)}
 .day.done{background:var(--good-bg);border-color:transparent}
 .day.done b::after{content:" ✓";color:var(--good)}
@@ -124,7 +128,9 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .sethd{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding-block:2px}
 .set{border-top:1px solid var(--line)}
 .set .sn{font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink3);text-align:center}
-.set .tgt{font-size:13px;line-height:1.2}
+.set .tgt{font-size:13px;line-height:1.2;min-width:0}
+.sethd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:359px){.set,.sethd{grid-template-columns:20px minmax(0,1fr) 52px 64px 44px;gap:6px;padding-inline:10px}.chk{width:44px}.set .tgt b{margin-left:0}}
 .set .tgt .x{font-family:var(--display);font-size:18px;font-weight:600}
 .set .tgt b{display:inline-block;font-size:11px;font-weight:600;color:var(--ink2);background:var(--sunk);border-radius:4px;padding:1px 5px;margin-left:2px;vertical-align:2px}
 .set .tgt b.top{background:var(--accent-soft);color:var(--accent)}
@@ -141,7 +147,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .pr{background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:700;border-radius:4px;padding:2px 6px;letter-spacing:.04em}
 .up{color:var(--good);font-weight:600} .down{color:var(--accent);font-weight:600}
 .note{padding:0 12px 12px}
-.note textarea{min-height:40px;resize:vertical;font-size:14px}
+.note textarea{min-height:40px;resize:vertical;font-size:16px}
 .notebtn{border:0;background:none;color:var(--ink2);font-size:13px;padding:0 12px 12px;text-decoration:underline;text-underline-offset:3px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -163,9 +169,9 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 
 /* stats & charts */
 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tile{background:var(--sunk);border-radius:10px;padding:10px}
+.tile{background:var(--sunk);border-radius:10px;padding:10px 8px;min-width:0}
 .tile .k{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
-.tile .v{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .v{font-family:var(--display);font-size:clamp(19px,6.4vw,26px);white-space:nowrap;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile .s{font-size:11.5px;color:var(--ink2)}
 .chart{display:flex;flex-direction:column;gap:6px}
 .chart svg{width:100%;height:auto;display:block;overflow:visible}
@@ -175,6 +181,11 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .ax{fill:var(--ink3);font-size:10px;font-family:var(--body)}
 .grid{stroke:var(--line);stroke-width:1}
+.rl{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rl:last-child{border-bottom:0}
+.rl .top{display:flex;align-items:baseline;gap:10px}
+.rl .top .n{margin-left:auto;font-family:var(--display);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rl .sets{font-size:13.5px;overflow-wrap:anywhere}
 table.t{width:100%;border-collapse:collapse;font-size:13.5px}
 table.t th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:6px 4px;border-bottom:1px solid var(--line)}
 table.t td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -280,7 +291,7 @@ async function boot(){
       const offer = w => { if(!w || !navigator.serviceWorker.controller) return; updateToast(w); };
       if(reg.waiting) offer(reg.waiting);
       reg.addEventListener('updatefound', () => { const w=reg.installing; w && w.addEventListener('statechange', () => { if(w.state==='installed') offer(w); }); });
-      let reloaded=false; navigator.serviceWorker.addEventListener('controllerchange', () => { if(reloaded) return; reloaded=true; persistLocal(); location.reload(); });
+      const hadController=!!navigator.serviceWorker.controller; let reloaded=false; navigator.serviceWorker.addEventListener('controllerchange', () => { if(reloaded || !hadController) return; reloaded=true; persistLocal(); location.reload(); });
       document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible') reg.update().catch(()=>{}); });
     }catch(e){ console.warn('offline setup failed', e); }
   }
@@ -413,7 +424,7 @@ function viewProgram(){
     h+=`<div class="wk"><div class="lab"><b>Week ${w}</b><span>${['Sets of 3','Sets of 3','Sets of 3','Sets of 2','Sets of 2','Sets of 2','3s 2s 1s','3s 2s 1s','3s 2s 1s'][w-1]}</span></div><div class="days">`;
     for(let d=1;d<=4;d++){
       const s=S.sessions[sid(c,w,d)], st=sessStatus(s), isNext=nu&&nu.w===w&&nu.d===d;
-      h+=`<button class="day ${st} ${isNext?'nextup':''}" data-act="open" data-w="${w}" data-d="${d}" aria-label="Week ${w} day ${d}"><b>D${d}</b><span>${s&&s.date?shortDate(s.date):PROGRAM[w-1][d-1].n.split(' ')[0]}</span></button>`;
+      h+=`<button class="day ${st} ${isNext?'nextup':''}" data-act="open" data-w="${w}" data-d="${d}" aria-label="Week ${w} day ${d}"><b>D${d}</b><span>${s&&s.date?s.date.slice(5).split('-').map(Number).join('/'):PROGRAM[w-1][d-1].n.split(' ')[0]}</span></button>`;
     }
     h+='</div></div>';
   }
@@ -521,7 +532,7 @@ function viewExercise(name){
   const lab=x=>`W${x.s.week}D${x.s.day}`;
   o+=`<section class="card">${lineChart({title:'Top set and estimated 1RM (lb)', series:[{name:'e1RM',color:'var(--c1)',pts:h.map(x=>({l:lab(x),y:x.st.e1||null,tip:`${shortDate(x.s.date)} · e1RM ${fmt(x.st.e1)} lb`}))},{name:'Top set',color:'var(--c2)',pts:h.map(x=>({l:lab(x),y:x.st.top?x.st.top.L:null,tip:`${shortDate(x.s.date)} · top ${x.st.top?fmt(x.st.top.w)+'×'+x.st.top.r:'–'}`}))}]})}</section>`;
   o+=`<section class="card">${barChart({title:'Tonnage per session (lb)', pts:h.map(x=>({l:lab(x),y:x.st.ton,tip:`${shortDate(x.s.date)} · ${fmt(x.st.ton)} lb over ${x.st.reps} reps`}))})}</section>`;
-  o+=`<h2 class="sec">Every session</h2><section class="card tblwrap"><table class="t"><thead><tr><th>When</th><th>Sets (lb×reps)</th><th style="text-align:right">Tonnage</th></tr></thead><tbody>${h.slice().reverse().map(x=>`<tr><td><b>${shortDate(x.s.date)}</b><br><span class="tiny muted">C${x.s.cycle} W${x.s.week} D${x.s.day}</span></td><td>${esc(setsStr(x.ex))}${x.ex.note?`<br><span class="tiny muted">“${esc(x.ex.note)}”</span>`:''}</td><td class="n" style="text-align:right">${fmt(x.st.ton)}</td></tr>`).join('')}</tbody></table></section>`;
+  o+=`<h2 class="sec">Every session</h2><section class="card">${h.slice().reverse().map(x=>`<div class="rl"><div class="top"><b>${shortDate(x.s.date)}</b><span class="tiny muted">Week ${x.s.week} · Day ${x.s.day}${x.s.cycle>1?` · Cycle ${x.s.cycle}`:''}</span><span class="n">${fmt(x.st.ton)} lb</span></div><div class="sets">${esc(setsStr(x.ex))}</div>${x.ex.note?`<div class="tiny muted">“${esc(x.ex.note)}”</div>`:''}</div>`).join('')}</section>`;
   return o;
 }
 
@@ -537,7 +548,7 @@ function viewProgress(){
       <div class="tiles"><div class="tile"><div class="k">Floor</div><div class="v">${fmt(lo)}</div></div><div class="tile"><div class="k">Average</div><div class="v">${fmt(avg)}</div></div><div class="tile"><div class="k">Ceiling</div><div class="v">${fmt(hi)}</div></div></div>
       ${barChart({title:'Tonnage by session (lb)', pts:h.map(x=>({l:`W${x.s.week}`,y:x.st.ton,tip:`Week ${x.s.week} · ${fmt(x.st.ton)} lb over ${x.st.reps} reps · top ${x.st.top?fmt(x.st.top.w)+'×'+x.st.top.r:'–'}`}))})}</section>`;
     const byReps={}; h.forEach(x=>{ const r=x.st.reps; if(!byReps[r]||x.st.ton>byReps[r].st.ton) byReps[r]=x; });
-    o+=`<section class="card tblwrap"><b>Best tonnage at each total rep count</b><div class="small muted" style="margin-bottom:6px">Compare days with the same number of working reps.</div><table class="t"><thead><tr><th>Total reps</th><th>Best tonnage</th><th>Top set</th><th>When</th></tr></thead><tbody>${Object.keys(byReps).sort((a,b)=>a-b).map(r=>{const x=byReps[r];return `<tr><td class="n">${r}</td><td class="n">${fmt(x.st.ton)}</td><td class="n">${x.st.top?fmt(x.st.top.w)+'×'+x.st.top.r:'–'}</td><td>W${x.s.week} · ${shortDate(x.s.date)}</td></tr>`}).join('')}</tbody></table></section>`;
+    o+=`<section class="card"><b>Best tonnage at each total rep count</b><div class="small muted">Compare days with the same number of working reps.</div>${Object.keys(byReps).sort((a,b)=>a-b).map(r=>{const x=byReps[r];return `<div class="rl"><div class="top"><b>${r} reps</b><span class="tiny muted">Week ${x.s.week} · ${shortDate(x.s.date)}</span><span class="n">${fmt(x.st.ton)} lb</span></div><div class="tiny muted">Top set ${x.st.top?fmt(x.st.top.w)+' × '+x.st.top.r:'–'}</div></div>`}).join('')}</section>`;
     o+=`<section class="card">${lineChart({title:'Top set and estimated 1RM (lb)', series:[{name:'e1RM',color:'var(--c1)',pts:h.map(x=>({l:`W${x.s.week}`,y:x.st.e1||null,tip:`Week ${x.s.week} · e1RM ${fmt(x.st.e1)} lb`}))},{name:'Top set',color:'var(--c2)',pts:h.map(x=>({l:`W${x.s.week}`,y:x.st.top?x.st.top.L:null,tip:`Week ${x.s.week} · top ${x.st.top?fmt(x.st.top.w)+'×'+x.st.top.r:'–'}`}))}]})}</section>`;
   }
   // weekly volume
