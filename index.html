@@ -130,7 +130,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .set .sn{font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink3);text-align:center}
 .set .tgt{font-size:13px;line-height:1.2;min-width:0}
 .sethd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media (max-width:359px){.set,.sethd{grid-template-columns:20px minmax(0,1fr) 52px 64px 44px;gap:6px;padding-inline:10px}.chk{width:44px}.set .tgt b{margin-left:0}}
+@media (max-width:359px){.sethd{letter-spacing:0;font-size:10.5px}.set,.sethd{grid-template-columns:20px minmax(0,1fr) 52px 64px 44px;gap:6px;padding-inline:10px}.chk{width:44px}.set .tgt b{margin-left:0}}
 .set .tgt .x{font-family:var(--display);font-size:18px;font-weight:600}
 .set .tgt b{display:inline-block;font-size:11px;font-weight:600;color:var(--ink2);background:var(--sunk);border-radius:4px;padding:1px 5px;margin-left:2px;vertical-align:2px}
 .set .tgt b.top{background:var(--accent-soft);color:var(--accent)}
@@ -148,6 +148,22 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .up{color:var(--good);font-weight:600} .down{color:var(--accent);font-weight:600}
 .note{padding:0 12px 12px}
 .note textarea{min-height:40px;resize:vertical;font-size:16px}
+.exlinks{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.exlink{border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;min-height:32px;display:inline-flex;align-items:center;gap:6px}
+.exlink svg{width:15px;height:15px;flex:none}
+.exlink.jake{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--sunk);border-radius:10px;padding:4px}
+.seg button{border:0;background:none;border-radius:8px;padding:9px 6px;font-weight:600;font-size:14px;color:var(--ink2);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.prose{display:flex;flex-direction:column;gap:12px;font-size:16px;line-height:1.55}
+.prose p{margin:0}
+.prose .ctx{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.tips{display:flex;flex-direction:column;gap:0;margin:0;padding:0;list-style:none}
+.tips li{padding:11px 0 11px 18px;border-bottom:1px solid var(--line);position:relative;font-size:15.5px;line-height:1.45}
+.tips li:last-child{border-bottom:0}
+.tips li::before{content:"";position:absolute;left:2px;top:19px;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.tips li span{display:block;font-size:12px;color:var(--ink3);margin-top:3px}
+.tiphd{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-top:6px}
 .notebtn{border:0;background:none;color:var(--ink2);font-size:13px;padding:0 12px 12px;text-decoration:underline;text-underline-offset:3px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -279,11 +295,38 @@ function saveSession(s){ s.updatedAt=Date.now(); S.sessions[s.id]=s; save('sessi
 function saveSettings(){ save('settings/main', S.settings, 300); }
 function saveBW(){ save('bodyweight/main', S.bw, 400); }
 
+let NOTES=null;
+async function loadNotes(){
+  try{ const r=await fetch('notes.json',{cache:'no-cache'}); if(r.ok){ const d=await r.json(); if(d && d.days) NOTES=d; } }catch(e){}
+  if(!NOTES){ const d=LS.get('notespack'); if(d && d.days) NOTES=d; }
+  if(NOTES) softRender();
+}
+function notesFor(s,ex){ if(!NOTES || !ex || ex.k==='+') return []; const d=NOTES.days[s.week+'-'+s.day]; return d && d[ex.k] ? d[ex.k].map(i=>NOTES.paras[i]) : []; }
+function tipsFor(name){ if(!NOTES || !NOTES.tips) return []; return NOTES.tips[name] || []; }
+const ICON_NOTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/></svg>';
+const ICON_TIP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>';
+function tipsHTML(name, primary){
+  const ts=tipsFor(name), gen=primary && NOTES ? (NOTES.general||[]) : [];
+  if(!ts.length && !gen.length) return `<p class="muted">Jake doesn't have specific tips for ${esc(name)} in Super Sets 1.0 or 2.0.</p>`;
+  let h='';
+  if(ts.length) h+=`<ul class="tips">${ts.map(t=>`<li>${esc(t.t)}<span>${esc(t.src)}</span></li>`).join('')}</ul>`;
+  if(gen.length) h+=`<div class="tiphd">For every low-rep primary lift</div><ul class="tips">${gen.map(t=>`<li>${esc(t.t)}<span>${esc(t.src)}</span></li>`).join('')}</ul>`;
+  return h;
+}
+function notesSheet(i, which){
+  const s=curSess(), ex=s.ex[i]; const ns=notesFor(s,ex), ts=tipsFor(ex.name), prim=ex.tier===2;
+  const hasTips=ts.length || (prim && NOTES && (NOTES.general||[]).length);
+  if(which==='tips' && !hasTips) which='notes'; if(which==='notes' && !ns.length) which='tips';
+  let body = which==='notes'
+    ? `<div class="prose"><div class="ctx">Week ${s.week} · Day ${s.day} · ${esc(ex.k)}${ex.name!==ex.orig?` · written for ${esc(ex.orig)}`:''}</div>${ns.map(p=>`<p>${esc(p)}</p>`).join('')}</div>`
+    : tipsHTML(ex.name, prim);
+  sheet(`<h3>${esc(ex.name)}</h3>${ns.length&&hasTips?`<div class="seg" role="group"><button data-act="notes" data-i="${i}" data-w="notes" aria-pressed="${which==='notes'}">Coaching notes</button><button data-act="notes" data-i="${i}" data-w="tips" aria-pressed="${which==='tips'}">Jake's Tips</button></div>`:''}${body}<button class="btn ghost" data-act="close">Close</button>`);
+}
 async function boot(){
   const ls = LS.get('sessions'), lset = LS.get('settings'), lbw = LS.get('bw');
   if(ls) S.sessions = ls; if(lset) S.settings = {...clone(DEFAULTS), ...lset}; if(lbw) S.bw = lbw;
   if(!LS.ok()){ S.mode='err'; render(); setSync('err','Can’t save'); toast('This browser is blocking storage, so nothing will be kept. Open the app from your home screen instead of a private tab.'); return; }
-  S.mode='local'; render(); idleSync();
+  S.mode='local'; render(); idleSync(); loadNotes();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   if('serviceWorker' in navigator && location.protocol!=='file:'){
     try{
@@ -418,6 +461,7 @@ function viewProgram(){
   }
   const nLogged=Object.values(S.sessions).filter(x=>sessStatus(x)!=='none').length, lb=S.settings.lastBackup;
   if(nLogged>=3 && (!lb || Date.now()-lb>7*864e5)) h+=`<section class="card row"><div class="grow small"><b>Back up your log</b><br><span class="muted">${lb?'Your last backup was over a week ago.':'Your workouts live only on this phone.'} Save a copy to Files or iCloud.</span></div><button class="btn sm" data-act="backup">Back up</button></section>`;
+  if(!NOTES) h+=`<section class="card row"><div class="grow small"><b>Add coaching notes and Jake's Tips</b><br><span class="muted">Load the notes file once in Settings.</span></div><button class="btn sm line" data-act="settings">Settings</button></section>`;
   h+=`<h2 class="sec">Cycle ${c} · 9 weeks</h2><section class="card" style="display:flex;flex-direction:column;gap:8px">`;
   for(let w=1;w<=9;w++){
     if((w-1)%3===0) h+=`<div class="wavehdr">Wave ${waveOf(w)} · ${WAVE[waveOf(w)-1]}</div>`;
@@ -467,10 +511,10 @@ function exCard(s,i){
   if(pr){ const t=pr.st.top; last=`Last time (${pr.s.date?shortDate(pr.s.date):'W'+pr.s.week}): ${t?`top ${fmt(t.w)}${bwx?'+BW':''}×${t.r}`:''} · ${fmt(pr.st.ton)} lb${pr.ex.note?` · “${esc(pr.ex.note)}”`:''}`; }
   else if(ex.tier===2 && !bwx && !(S.settings.maxes||{})[ex.name]) last=`<button class="notebtn" style="padding:0" data-act="menu" data-i="${i}">Set your ${esc(ex.name)} max to get % weights</button>`;
   let h=`<article class="ex" id="ex-${i}"><div class="exhd"><span class="badge" style="background:${badgeCol};${ex.tier===4||ex.tier===6?'color:var(--bg)':''}">${esc(ex.k==='+'?'+':ex.k)}</span>
-    <div class="grow"><h3>${esc(ex.name)}</h3><div class="scheme">${esc(scheme(ex))}${ex.name!==ex.orig?` · swapped from ${esc(ex.orig)}`:''}</div></div>
+    <div class="grow"><h3>${esc(ex.name)}</h3><div class="scheme">${esc(scheme(ex))}${ex.name!==ex.orig?` · swapped from ${esc(ex.orig)}`:''}</div>${(()=>{ const n=notesFor(s,ex).length, t=tipsFor(ex.name).length || (ex.tier===2 && NOTES && (NOTES.general||[]).length); return (n||t)?`<div class="exlinks">${n?`<button class="exlink" data-act="notes" data-i="${i}" data-w="notes">${ICON_NOTE}Coaching notes</button>`:''}${t?`<button class="exlink jake" data-act="notes" data-i="${i}" data-w="tips">${ICON_TIP}Jake's Tips</button>`:''}</div>`:''; })()}</div>
     <button class="iconbtn" data-act="menu" data-i="${i}" aria-label="Options for ${esc(ex.name)}">${ICON_DOTS}</button></div>`;
   if(last) h+=`<div class="last">${last}</div>`;
-  h+=`<div class="sets"><div class="sethd"><span>Set</span><span>Target</span><span style="text-align:center">Reps</span><span style="text-align:center">${bwx?'+lb':'lb'}</span><span></span></div>`;
+  h+=`<div class="sets"><div class="sethd"><span style="text-align:center">#</span><span>Target</span><span style="text-align:center">Reps</span><span style="text-align:center">${bwx?'+lb':'lb'}</span><span></span></div>`;
   ex.sets.forEach((x,j)=>{
     const sug=suggest(s,i,j);
     const tg = x.tg==='TOP' ? '<b class="top">Top set</b>' : (x.tg?`<b>${esc(x.tg)}</b>`:'');
@@ -524,6 +568,8 @@ function viewExercises(){
 function viewExercise(name){
   const h=historyFor(name);
   let o=`<div class="row"><button class="btn sm ghost" data-act="exback">‹ All exercises</button></div><h1 class="d" style="font-size:32px;text-transform:uppercase;line-height:1">${esc(name)}</h1>`;
+  const tipsN=tipsFor(name).length;
+  if(tipsN) o+=`<section class="card"><div class="row" style="margin-bottom:4px"><span style="color:var(--accent);display:inline-flex;width:18px">${ICON_TIP}</span><b class="grow">Jake's Tips</b></div>${tipsHTML(name,false)}</section>`;
   if(!h.length) return o+`<div class="empty">No sets logged for ${esc(name)} yet.</div>`;
   const bestE1=h.reduce((a,x)=>x.st.e1>a.st.e1?x:a,h[0]); const bestTop=h.reduce((a,x)=>(x.st.top&&(!a.st.top||x.st.top.L>a.st.top.L))?x:a,h[0]); const bestTon=h.reduce((a,x)=>x.st.ton>a.st.ton?x:a,h[0]);
   o+=`<div class="tiles"><div class="tile"><div class="k">Best e1RM</div><div class="v">${fmt(bestE1.st.e1)}</div><div class="s">${shortDate(bestE1.s.date)}</div></div>
@@ -625,6 +671,8 @@ function viewSettings(){
   o+=`<section class="card" style="display:flex;flex-direction:column;gap:8px"><b>Program changes</b><div class="small muted">Swaps and added exercises that apply to every remaining week. Make them from an exercise's ⋯ menu in a workout.</div>
     ${modRows.length?`<div class="list">${modRows.map(r=>`<div class="li"><div class="grow"><b>Day ${r.d} · ${r.type==='swap'?`${esc(r.k)} → ${esc(r.n)}`:`Added ${esc(r.n)}`}</b><span>${r.type==='add'?`Tier ${r.a.tier} · ${r.a.sets} × ${r.a.reps}`:'Swap'}</span></div><button class="btn sm line" data-act="rmmod" data-d="${r.d}" data-k="${esc(r.k)}" data-type="${r.type}" data-idx="${r.idx??''}">Remove</button></div>`).join('')}</div>`:''}</section>`;
   o+=`<section class="card" style="display:flex;flex-direction:column;gap:10px"><b>Cycle</b><div class="small muted">You're on cycle ${S.settings.cycle}. Starting a new cycle gives you a fresh 9-week grid. Your history, charts and PRs keep everything.</div><button class="btn line" data-act="newcycle">Start cycle ${S.settings.cycle+1}</button>${S.settings.cycle>1?`<button class="btn ghost sm" data-act="prevcycle">Go back to cycle ${S.settings.cycle-1}</button>`:''}</section>`;
+  const tipN=NOTES&&NOTES.tips?Object.keys(NOTES.tips).length:0;
+  o+=`<section class="card" style="display:flex;flex-direction:column;gap:10px"><b>Coaching notes and Jake's Tips</b><div class="small muted">${NOTES?`Loaded: ${NOTES.paras.length} coaching notes across all 36 workouts, and Jake's Tips for ${tipN} exercises. They're stored on this phone and work offline.`:`Load the notes file (swole-log-notes.json) from Files or iCloud Drive to see the program's coaching notes and Jake's Tips on each exercise.`}</div><button class="btn ${NOTES?'line':''}" data-act="loadnotes">${NOTES?'Replace notes file':'Load notes file'}</button><input type="file" id="notes-file" accept=".json,application/json" hidden></section>`;
   const lb=S.settings.lastBackup;
   o+=`<section class="card" style="display:flex;flex-direction:column;gap:10px"><b>Your data</b><div class="small muted">Everything is saved on this phone and works with no signal. Nothing is sent anywhere. If you delete the app or clear Safari data, it's gone, so save a backup to Files or iCloud Drive now and then. ${lb?`Last backup: ${esc(new Date(lb).toLocaleDateString('en-US',{month:'short',day:'numeric'}))}.`:'No backup yet.'}</div>
     <div class="row wrap"><button class="btn grow" data-act="backup">Save backup</button><button class="btn line grow" data-act="restore">Restore backup</button></div>
@@ -711,6 +759,8 @@ document.addEventListener('click', e => {
         startRest(ex.tier===2 ? +S.settings.rest.primary : +S.settings.rest.other); }
       commit(s); refreshCard(i); break; }
     case 'menu': menuSheet(i); break;
+    case 'notes': notesSheet(i, t.dataset.w); break;
+    case 'loadnotes': $('#notes-file').click(); break;
     case 'note': s.ex[i].showNote=true; refreshCard(i); const n=document.getElementById('note-'+i); n&&n.focus(); break;
     case 'savemax': { const v=num($('#menu-max').value); S.settings.maxes={...(S.settings.maxes||{})}; if(v) S.settings.maxes[s.ex[i].name]=v; else delete S.settings.maxes[s.ex[i].name]; saveSettings(); closeSheet(); render(); toast('Max saved'); break; }
     case 'swap': swapSheet(i); break;
@@ -809,6 +859,12 @@ function applyRestore(){
   if(d.bodyweight && d.bodyweight.entries){ const m={}; (S.bw.entries||[]).concat(d.bodyweight.entries).forEach(e=>{ m[e.date]=e; }); S.bw={entries:Object.values(m)}; }
   persistLocal(); render(); toast('Backup restored');
 }
+document.addEventListener('change', e => { if(e.target.id!=='notes-file' || !e.target.files[0]) return;
+  const fr=new FileReader(); fr.onload=()=>{ let d; try{ d=JSON.parse(fr.result); }catch(err){ d=null; }
+    if(!d || !d.days || !Array.isArray(d.paras)){ toast('That file isn’t a Swole Log notes file.'); return; }
+    if(!LS.set('notespack', d)){ toast('Not enough space on this phone to store the notes.'); return; }
+    NOTES=d; render(); toast('Coaching notes and Jake’s Tips loaded'); };
+  fr.readAsText(e.target.files[0]); e.target.value=''; });
 document.addEventListener('change', e => { if(e.target.id==='restore-file' && e.target.files[0]){ readRestore(e.target.files[0]); e.target.value=''; } });
 boot();
 </script>

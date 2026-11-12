@@ -1,10 +1,13 @@
 // Swole Log offline cache. Bump VERSION whenever any app file changes.
-const VERSION = 'swole-log-v2';
+const VERSION = 'swole-log-v3';
 const FONTS = 'swole-log-fonts';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL.map(u => new Request(u, {cache: 'reload'})))));
+  e.waitUntil(caches.open(VERSION).then(async c => {
+    await c.addAll(SHELL.map(u => new Request(u, {cache: 'reload'})));
+    try { const r = await fetch(new Request('./notes.json', {cache: 'reload'})); if (r.ok) await c.put('./notes.json', r); } catch (err) {}
+  }));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
