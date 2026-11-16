@@ -163,7 +163,8 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 .tips li:last-child{border-bottom:0}
 .tips li::before{content:"";position:absolute;left:2px;top:19px;width:7px;height:7px;border-radius:2px;background:var(--accent)}
 .tips li span{display:block;font-size:12px;color:var(--ink3);margin-top:3px}
-.tiphd{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-top:6px}
+.tiphd{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-top:8px}
+.tiphd:first-child{margin-top:0}
 .notebtn{border:0;background:none;color:var(--ink2);font-size:13px;padding:0 12px 12px;text-decoration:underline;text-underline-offset:3px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -305,13 +306,18 @@ function notesFor(s,ex){ if(!NOTES || !ex || ex.k==='+') return []; const d=NOTE
 function tipsFor(name){ if(!NOTES || !NOTES.tips) return []; return NOTES.tips[name] || []; }
 const ICON_NOTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/></svg>';
 const ICON_TIP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>';
+function tipList(items){
+  const cats=(NOTES&&NOTES.cats)||[]; const groups={};
+  items.forEach(t=>{ const c=t.c||'Tips'; (groups[c]=groups[c]||[]).push(t); });
+  const order=[...cats.filter(c=>groups[c]), ...Object.keys(groups).filter(c=>!cats.includes(c))];
+  return order.map(c=>`<div class="tiphd">${esc(c)}</div><ul class="tips">${groups[c].map(t=>`<li>${esc(t.t)}</li>`).join('')}</ul>`).join('');
+}
 function tipsHTML(name, primary){
   const ts=tipsFor(name), gen=primary && NOTES ? (NOTES.general||[]) : [];
-  if(!ts.length && !gen.length) return `<p class="muted">Jake doesn't have specific tips for ${esc(name)} in Super Sets 1.0 or 2.0.</p>`;
-  let h='';
-  if(ts.length) h+=`<ul class="tips">${ts.map(t=>`<li>${esc(t.t)}<span>${esc(t.src)}</span></li>`).join('')}</ul>`;
-  if(gen.length) h+=`<div class="tiphd">For every low-rep primary lift</div><ul class="tips">${gen.map(t=>`<li>${esc(t.t)}<span>${esc(t.src)}</span></li>`).join('')}</ul>`;
-  return h;
+  if(!ts.length && !gen.length) return `<p class="muted">Jake doesn't have specific tips for ${esc(name)}.</p>`;
+  let h=tipList(ts);
+  if(gen.length) h+=`<div class="tiphd" style="margin-top:14px;color:var(--accent)">Every low-rep primary lift</div><ul class="tips">${gen.map(t=>`<li>${esc(t.t)}</li>`).join('')}</ul>`;
+  return h+`<p class="tiny muted" style="margin:10px 0 0">Compiled from Jake's Super Sets 1.0 and 2.0.</p>`;
 }
 function notesSheet(i, which){
   const s=curSess(), ex=s.ex[i]; const ns=notesFor(s,ex), ts=tipsFor(ex.name), prim=ex.tier===2;
